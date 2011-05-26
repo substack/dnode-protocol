@@ -21,7 +21,7 @@ var exports = module.exports = function (wrapper) {
     };
     
     self.destroy = function (id) {
-        delete self.clients[id];
+        delete self.sessions[id];
     };
     
     return self;
