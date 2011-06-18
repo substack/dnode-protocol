@@ -226,6 +226,9 @@ var parseArgs = exports.parseArgs = function (argv) {
             if (arg.match(/^\d+$/)) {
                 params.port = parseInt(arg, 10);
             }
+            else if (arg.match('^/')) {
+                params.path = arg;
+            }
             else {
                 params.host = arg;
             }
