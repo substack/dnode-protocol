@@ -1,7 +1,7 @@
 {
     "name": "dnode-protocol",
     "description": "Implements the dnode protocol abstractly",
-    "version": "0.0.10",
+    "version": "0.0.12",
     "repository": "https://github.com/substack/dnode-protocol.git",
     "author": {
         "name" : "James Halliday",

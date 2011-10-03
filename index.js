@@ -39,7 +39,18 @@ var Session = exports.Session = function (id, wrapper) {
             : wrapper || {}
     ;
     
-    var scrubber = new Scrubber;
+    self.local_store = new Store;
+    self.remote_store = new Store;
+    
+    self.local_store.on('cull', function (id) {
+        self.emit('request', {
+            method : 'cull',
+            arguments : [id],
+            callbacks : {}
+        });
+    });
+    
+    var scrubber = new Scrubber(self.local_store);
     
     self.start = function () {
         self.request('methods', [ instance ]);
@@ -70,17 +81,16 @@ var Session = exports.Session = function (id, wrapper) {
         catch (err) { self.emit('error', err) }
     };
     
-    var wrapped = {};
     self.handle = function (req) {
         var args = scrubber.unscrub(req, function (id) {
-            if (!(id in wrapped)) {
+            if (!self.remote_store.has(id)) {
                 // create a new function only if one hasn't already been created
                 // for a particular id
-                wrapped[id] = function () {
+                self.remote_store.add(function () {
                     self.request(id, [].slice.apply(arguments));
-                };
+                }, id);
             }
-            return wrapped[id];
+            return self.remote_store.get(id);
         });
         
         if (req.method === 'methods') {
@@ -89,6 +99,11 @@ var Session = exports.Session = function (id, wrapper) {
         else if (req.method === 'error') {
             var methods = args[0];
             self.emit('remoteError', methods);
+        }
+        else if (req.method === 'cull') {
+            args.forEach(function (id) {
+                self.remote_store.cull(args);
+            });
         }
         else if (typeof req.method === 'string') {
             if (self.instance.propertyIsEnumerable(req.method)) {
@@ -101,7 +116,7 @@ var Session = exports.Session = function (id, wrapper) {
             }
         }
         else if (typeof req.method == 'number') {
-            apply(scrubber.callbacks[req.method], self.instance, args);
+            apply(self.local_store.get(req.method), self.instance, args);
         }
     }
     
@@ -132,12 +147,13 @@ var Session = exports.Session = function (id, wrapper) {
 };
 
 // scrub callbacks out of requests in order to call them again later
-var Scrubber = exports.Scrubber = function () {
+var Scrubber = exports.Scrubber = function (store) {
     var self = {};
-    self.callbacks = {};
-    var wrapped = [];
+    store = store || new Store;
     
-    var cbId = 0;
+    self.__defineGetter__('callbacks', function () {
+        return store.items;
+    });
     
     // Take the functions out and note them for future use
     self.scrub = function (obj) {
@@ -146,7 +162,7 @@ var Scrubber = exports.Scrubber = function () {
         
         var args = Traverse(obj).map(function (node) {
             if (typeof(node) == 'function') {
-                var i = wrapped.indexOf(node);
+                var i = store.indexOf(node);
                 if (i >= 0 && !(i in paths)) {
                     // Keep previous function IDs only for the first function
                     // found. This is somewhat suboptimal but the alternatives
@@ -154,10 +170,8 @@ var Scrubber = exports.Scrubber = function () {
                     paths[i] = this.path;
                 }
                 else {
-                    self.callbacks[cbId] = node;
-                    wrapped.push(node);
-                    paths[cbId] = this.path;
-                    cbId++;
+                    var id = store.add(node);
+                    paths[id] = this.path;
                 }
                 
                 this.update('[Function]');
@@ -217,6 +231,57 @@ var Scrubber = exports.Scrubber = function () {
     
     return self;
 }
+
+var Store = exports.Store = function() {
+    var self = new EventEmitter;
+    var items = self.items = [];
+    
+    self.has = function (id) {
+        return items[id] != undefined;
+    };
+    
+    self.get = function (id) {
+        if (!self.has(id)) return null;
+        return wrap(items[id]);
+    };
+    
+    self.add = function (fn, id) {
+        if (id == undefined) id = items.length;
+        items[id] = fn;
+        return id;
+    };
+    
+    self.cull = function (arg) {
+        if (typeof arg == 'function') {
+            arg = items.indexOf(arg);
+        }
+        delete items[arg];
+        return arg;
+    };
+    
+    self.indexOf = function (fn) {
+        return items.indexOf(fn);
+    };
+    
+    function wrap (fn) {
+        return function() {
+            fn.apply(this, arguments);
+            auto_cull(fn);
+        };
+    }
+    
+    function auto_cull (fn) {
+        if (typeof fn.times == 'number') {
+            fn.times--;
+            if (fn.times == 0) {
+                var id = self.cull(fn);
+                self.emit('cull', id);
+            }
+        }
+    }
+    
+    return self;
+};
 
 var parseArgs = exports.parseArgs = function (argv) {
     var params = {};
