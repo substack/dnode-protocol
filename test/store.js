@@ -1,5 +1,5 @@
 var assert = require('assert');
-var Store = require('dnode-protocol').Store;
+var Store = require('../').Store;
 
 exports.store = function () {
     var s = new Store;
