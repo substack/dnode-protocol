@@ -34,7 +34,7 @@ var Session = exports.Session = function (id, wrapper) {
     self.remote = {};
     
     var instance = self.instance =
-        typeof(wrapper) == 'function'
+        typeof(wrapper) === 'function'
             ? new wrapper(self.remote, self)
             : wrapper || {}
     ;
@@ -69,7 +69,7 @@ var Session = exports.Session = function (id, wrapper) {
     
     self.parse = function (line) {
         var msg = null;
-        try { msg = JSON.parse(line) }
+        try { msg = JSON.parse(line); }
         catch (err) {
             self.emit('error', new SyntaxError(
                 'Error parsing JSON message: ' + JSON.stringify(line))
@@ -77,8 +77,8 @@ var Session = exports.Session = function (id, wrapper) {
             return;
         }
         
-        try { self.handle(msg) }
-        catch (err) { self.emit('error', err) }
+        try { self.handle(msg); }
+        catch (err) { self.emit('error', err); }
     };
     
     self.handle = function (req) {
@@ -101,9 +101,7 @@ var Session = exports.Session = function (id, wrapper) {
             self.emit('remoteError', methods);
         }
         else if (req.method === 'cull') {
-            args.forEach(function (id) {
-                self.remoteStore.cull(args);
-            });
+            self.remoteStore.cull(args);
         }
         else if (typeof req.method === 'string') {
             if (self.instance.propertyIsEnumerable(req.method)) {
@@ -115,13 +113,13 @@ var Session = exports.Session = function (id, wrapper) {
                 ));
             }
         }
-        else if (typeof req.method == 'number') {
+        else if (typeof req.method === 'number') {
             apply(self.localStore.get(req.method), self.instance, args);
         }
-    }
+    };
     
     function handleMethods (methods) {
-        if (typeof methods != 'object') {
+        if (typeof methods !== 'object') {
             methods = {};
         }
         
@@ -139,8 +137,8 @@ var Session = exports.Session = function (id, wrapper) {
     }
     
     function apply(f, obj, args) {
-        try { f.apply(obj, args) }
-        catch (err) { self.emit('error', err) }
+        try { f.apply(obj, args); }
+        catch (err) { self.emit('error', err); }
     }
     
     return self;
@@ -158,7 +156,7 @@ var Scrubber = exports.Scrubber = function (store) {
         var links = [];
         
         var args = Traverse(obj).map(function (node) {
-            if (typeof(node) == 'function') {
+            if (typeof(node) === 'function') {
                 var i = store.indexOf(node);
                 if (i >= 0 && !(i in paths)) {
                     // Keep previous function IDs only for the first function
@@ -211,8 +209,8 @@ var Scrubber = exports.Scrubber = function (store) {
             if (Object.propertyIsEnumerable.call(node, key)) {
                 node = node[key];
             }
-            else return undefined;
-        };
+            else return;
+        }
         var last = path.slice(-1)[0];
         if (last === undefined) {
             return value;
@@ -229,38 +227,47 @@ var Scrubber = exports.Scrubber = function (store) {
             if (Object.propertyIsEnumerable.call(node, key)) {
                 node = node[key];
             }
-            else return undefined;
+            else return;
         }
         return node;
     }
     
     return self;
-}
+};
 
 var Store = exports.Store = function() {
     var self = new EventEmitter;
     var items = self.items = [];
+    var wrapped = [];
     
     self.has = function (id) {
-        return items[id] != undefined;
+        return items[id] !== undefined;
     };
     
     self.get = function (id) {
         if (!self.has(id)) return null;
-        return wrap(items[id]);
+        return wrapped[id];
     };
     
     self.add = function (fn, id) {
-        if (id == undefined) id = items.length;
+        if (typeof id === 'undefined') {
+            id = items.length;
+        }
         items[id] = fn;
+        wrapped[id] = wrap(fn);
         return id;
     };
     
     self.cull = function (arg) {
-        if (typeof arg == 'function') {
+        if (typeof arg === 'function') {
             arg = items.indexOf(arg);
+        } else if(arg instanceof Array) {
+            return arg.forEach(function(id) {
+                self.cull(id);
+            });
         }
         delete items[arg];
+        delete wrapped[arg];
         return arg;
     };
     
@@ -276,13 +283,10 @@ var Store = exports.Store = function() {
     }
     
     function autoCull (fn) {
-        if (typeof fn.times == 'number') {
-            fn.times--;
-            if (fn.times == 0) {
-                var id = self.cull(fn);
-                self.emit('cull', id);
-            }
-        }
+        if (typeof fn.times !== 'number') return;
+        if(--fn.times) return;
+        var id = self.cull(fn);
+        self.emit('cull', id);
     }
     
     return self;
