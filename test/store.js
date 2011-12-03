@@ -4,7 +4,7 @@ var Store = require('dnode-protocol').Store;
 exports.store = function () {
     var s = new Store;
     
-    assert.eql(s.items.length, 0);
+    assert.eql(Object.keys(s.items).length, 0);
     
     var i = 0;
     var cb = function() {
@@ -15,7 +15,7 @@ exports.store = function () {
         cb();
     };
     s.add(fn1);
-    assert.eql(s.items.length, 1);
+    assert.eql(Object.keys(s.items).length, 1);
     s.get(0)();
     fn1();
     assert.eql(i, 2);
@@ -26,19 +26,20 @@ exports.store = function () {
     };
     fn2.times = 2;
     s.add(fn2);
-    assert.eql(s.items.length, 2);
+    assert.eql(Object.keys(s.items).length, 2);
     s.get(1)();
     fn2();
     assert.eql(i, 4);
-    assert.eql(s.items[1].times, 1);
+    assert.eql(s.items[1].f.times, 1);
     s.get(1)();
     assert.eql(s.items[1], undefined);
     
     var fn3 = function() {
         cb2();
     };
+    assert.eql(Object.keys(s.items).length, 1);
     s.add(fn3);
-    assert.eql(s.items.length, 3);
+    assert.eql(Object.keys(s.items).length, 2);
 };
 
 

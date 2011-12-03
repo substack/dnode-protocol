@@ -51,6 +51,14 @@ var Session = exports.Session = function (id, wrapper) {
         });
     });
     
+    self.remoteStore.on('cull', function (id) {
+        self.emit('request', {
+            method : 'cullYours',
+            arguments : [id],
+            callbacks : {}
+        });
+    });
+    
     var scrubber = new Scrubber(self.localStore);
     
     self.start = function () {
@@ -103,7 +111,12 @@ var Session = exports.Session = function (id, wrapper) {
         }
         else if (req.method === 'cull') {
             args.forEach(function (id) {
-                self.remoteStore.cull(args);
+                self.remoteStore.cull(id);
+            });
+        }
+        else if (req.method === 'cullYours') {
+            args.forEach(function (id) {
+                self.localStore.cull(id);
             });
         }
         else if (typeof req.method === 'string') {
@@ -240,7 +253,8 @@ var Scrubber = exports.Scrubber = function (store) {
 
 var Store = exports.Store = function() {
     var self = new EventEmitter;
-    var items = self.items = [];
+    var items = self.items = {};
+    var counter = 0;
     
     self.has = function (id) {
         return items[id] != undefined;
@@ -248,25 +262,39 @@ var Store = exports.Store = function() {
     
     self.get = function (id) {
         if (!self.has(id)) return null;
-        return wrap(items[id]);
+        return wrap(items[id].f);
     };
     
     self.add = function (fn, id) {
-        if (id == undefined) id = items.length;
-        items[id] = fn;
+        if (id == undefined) id = counter++;
+        items[id] = {f: fn};
+        self.emit('wrapped', id, items);
         return id;
     };
     
-    self.cull = function (arg) {
-        if (typeof arg == 'function') {
-            arg = items.indexOf(arg);
+    self.cull = function (i) {
+        if (typeof i === 'function') {
+            Object.keys(items).some(function(key) {
+                if (items[key].f === i) {
+                    i = key;
+                    return true;
+                }
+            });
         }
-        delete items[arg];
-        return arg;
+        if (!items.hasOwnProperty(i)) return -1;
+        delete items[i];
+        return i;
     };
     
     self.indexOf = function (fn) {
-        return items.indexOf(fn);
+        var result = -1;
+        Object.keys(items).some(function(key) {
+            if (items[key] === fn) {
+                result = key;
+                return true;
+            }
+        })
+        return result;
     };
     
     function wrap (fn) {

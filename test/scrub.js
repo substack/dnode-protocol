@@ -7,7 +7,7 @@ exports.noFuncs = function () {
         s.scrub([ 1, 2, 3 ]),
         {
             arguments : [ 1, 2, 3 ],
-            callbacks : [],
+            callbacks : {},
             links : [],
         }
     );
@@ -16,7 +16,7 @@ exports.noFuncs = function () {
         s.scrub([ 4, { a : 5, b : 6 } ]),
         {
             arguments : [ 4, { a : 5, b : 6 } ],
-            callbacks : [],
+            callbacks : {},
             links : [],
         }
     );
@@ -36,10 +36,10 @@ exports.funcs = function () {
         links : [],
     });
     
-    s.callbacks[0]();
+    s.callbacks[0].f();
     assert.eql(calls, { f : 1, g : 0 });
     
-    s.callbacks[1]();
+    s.callbacks[1].f();
     assert.eql(calls, { f : 1, g : 1 });
 };
 
