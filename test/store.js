@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var Store = require('dnode-protocol').Store;
+var Store = require('../lib/store');
 
 test('store', function (t) {
     var s = new Store;

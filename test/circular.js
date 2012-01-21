@@ -1,5 +1,5 @@
 var test = require('tap').test;
-var Scrubber = require('../').Scrubber;
+var Scrubber = require('../lib/scrubber');
 
 test('circular', function (t) {
     var s = new Scrubber;
