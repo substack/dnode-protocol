@@ -1,6 +1,6 @@
-var Traverse = require('traverse');
+var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
-var stream = process.title === 'browser' ? {} : require('stream');
+var stream = require('stream');
 var json = typeof JSON === 'object' ? JSON : require('jsonify');
 
 var exports = module.exports = function (wrapper) {
@@ -158,7 +158,7 @@ var Scrubber = exports.Scrubber = function (store) {
         var paths = {};
         var links = [];
         
-        var args = Traverse(obj).map(function (node) {
+        var args = traverse(obj).map(function (node) {
             if (typeof(node) == 'function') {
                 var i = store.indexOf(node);
                 if (i >= 0 && !(i in paths)) {
