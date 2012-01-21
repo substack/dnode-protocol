@@ -1,28 +1,29 @@
-var assert = require('assert');
+var test = require('tap').test;
 var Scrubber = require('../').Scrubber;
 
-exports.noFuncs = function () {
+test('no functions', function (t) {
     var s = new Scrubber;
-    assert.eql(
+    t.deepEqual(
         s.scrub([ 1, 2, 3 ]),
         {
             arguments : [ 1, 2, 3 ],
-            callbacks : [],
+            callbacks : {},
             links : [],
         }
     );
     
-    assert.eql(
+    t.deepEqual(
         s.scrub([ 4, { a : 5, b : 6 } ]),
         {
             arguments : [ 4, { a : 5, b : 6 } ],
-            callbacks : [],
+            callbacks : {},
             links : [],
         }
     );
-};
+    t.end();
+});
 
-exports.funcs = function () {
+test('functions', function (t) {
     var s = new Scrubber;
     
     var calls = { f : 0, g : 0 };
@@ -30,42 +31,45 @@ exports.funcs = function () {
     var g = function () { calls.g ++ };
     
     var sc = s.scrub([ 1, 2, f, g ]);
-    assert.eql(sc, {
+    t.deepEqual(sc, {
         arguments : [ 1, 2, '[Function]', '[Function]' ],
         callbacks : { 0 : [ '2' ], 1 : [ '3' ] },
         links : [],
     });
     
     s.callbacks[0]();
-    assert.eql(calls, { f : 1, g : 0 });
+    t.deepEqual(calls, { f : 1, g : 0 });
     
     s.callbacks[1]();
-    assert.eql(calls, { f : 1, g : 1 });
-};
+    t.deepEqual(calls, { f : 1, g : 1 });
+    
+    t.end();
+});
 
-exports.link = function () {
+test('link', function (t) {
     var s = new Scrubber;
     var x = [ [ 0, { a : 1, b : 2, c : 3 }, 4 ], 5, 6 ];
     x[0][1].d = x[0][1];
     var sc = s.scrub(x);
     
-    assert.eql(sc, {
+    t.deepEqual(sc, {
         arguments : [
             [ 0, { a : 1, b : 2, c : 3, d : '[Circular]' }, 4 ], 5, 6
         ],
         callbacks : {},
         links : [ { from : [ '0', '1'  ], to : [ '0', '1', 'd' ] } ],
     });
-};
+    t.end();
+});
 
-exports.multilink = function () {
+test('multilink', function (t) {
     var s = new Scrubber;
     var x = [ [ 0, { a : 1, b : 2, c : 3 }, 4 ], 5, 6 ];
     x[0][1].d = x[0][1];
     x.push(x);
     var sc = s.scrub(x);
     
-    assert.eql(sc, {
+    t.deepEqual(sc, {
         arguments : [
             [ 0, { a : 1, b : 2, c : 3, d : '[Circular]' }, 4 ],
             5, 6, '[Circular]'
@@ -76,9 +80,10 @@ exports.multilink = function () {
             { from : [], to : [ '3' ] },
         ],
     });
-};
+    t.end();
+});
 
-exports.enumSetLink = function () {
+test('enum set link', function (t) {
     var s = new Scrubber;
     var req = {
         method : 0,
@@ -93,10 +98,11 @@ exports.enumSetLink = function () {
     var args = s.unscrub(req, function (id) {
         return function () {};
     });
-    assert.ok(!(function () {}).beep, 'created non-enumerable property');
-};
+    t.ok(!(function () {}).beep, 'created non-enumerable property');
+    t.end();
+});
 
-exports.enumGetLink = function () {
+test('enum get link', function (t) {
     var s = new Scrubber;
     var req = {
         method : 0,
@@ -112,10 +118,11 @@ exports.enumGetLink = function () {
         return function () {};
     });
     
-    assert.ok(args[0] === undefined);
-};
+    t.ok(args[0] === undefined);
+    t.end();
+});
 
-exports.skipSet = function () {
+test('skip set', function (t) {
     var s = new Scrubber;
     var req = {
         method : 0,
@@ -127,5 +134,6 @@ exports.skipSet = function () {
     var args = s.unscrub(req, function (id) {
         return function () {};
     });
-    assert.equal(args[2], 33);
-};
+    t.equal(args[2], 33);
+    t.end();
+});

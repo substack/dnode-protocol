@@ -1,20 +1,20 @@
-var assert = require('assert');
+var test = require('tap').test;
 var protocol = require('../');
 
 function argv () { return arguments }
 
-exports.args = function () {
-    assert.eql(
+test('args', function (t) {
+    t.deepEqual(
         protocol.parseArgs(argv('moo.com', 555)),
         { host : 'moo.com', port : 555 }
     );
     
-    assert.eql(
+    t.deepEqual(
         protocol.parseArgs(argv('7777')),
         { port : 7777 }
     );
     
-    assert.eql(
+    t.deepEqual(
         protocol.parseArgs(argv({
             host : 'moosy.moo.com',
             port : 5050,
@@ -22,24 +22,24 @@ exports.args = function () {
         { host : 'moosy.moo.com', port : 5050 }
     );
     
-    assert.eql(
+    t.deepEqual(
         protocol.parseArgs(argv('meow.cats.com', { port : '1234', })),
         { host : 'meow.cats.com', port : 1234 }
     );
     
-    assert.eql(
+    t.deepEqual(
         typeof protocol.parseArgs(argv('789')).port,
         'number'
     );
     
-    assert.eql(
+    t.deepEqual(
         protocol.parseArgs(argv(
             { host : 'woof.dogs.com' }, { port : 4050 }
         )),
         { host : 'woof.dogs.com', port : 4050 }
     );
     
-    assert.eql(
+    t.deepEqual(
         protocol.parseArgs(argv(
             undefined,
             { host : 'woof.dogs.com' },
@@ -49,4 +49,6 @@ exports.args = function () {
         )),
         { host : 'woof.dogs.com', port : 4050 }
     );
-};
+    
+    t.end();
+});

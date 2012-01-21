@@ -1,8 +1,10 @@
-var assert = require('assert');
+var test = require('tap').test;
 var proto = require('../');
-var Traverse = require('traverse');
+var traverse = require('traverse');
 
-exports.protoHashes = function () {
+test('proto hashes', function (t) {
+    t.plan(7);
+    
     var server = proto({
         x : function (f, g) {
             setTimeout(f.bind({}, 7, 8, 9), 50);
@@ -18,27 +20,19 @@ exports.protoHashes = function () {
     
     var sreqs = [];
     s.on('request', function (req) {
-        sreqs.push(Traverse.clone(req));
+        sreqs.push(traverse.clone(req));
         c.handle(req);
     });
     
     var creqs = [];
     c.on('request', function (req) {
-        creqs.push(Traverse.clone(req));
+        creqs.push(traverse.clone(req));
         s.handle(req);
     });
     
-    var tf = setTimeout(function () {
-        assert.fail('never called f');
-    }, 5000);
-    
-    var tg = setTimeout(function () {
-        assert.fail('never called g');
-    }, 5000);
-    
     s.start();
     
-    assert.eql(sreqs, [ {
+    t.deepEqual(sreqs, [ {
         method : 'methods',
         arguments : [ { x : '[Function]', y : 555 } ],
         callbacks : { 0 : [ '0', 'x' ] },
@@ -47,7 +41,7 @@ exports.protoHashes = function () {
     
     c.start();
     
-    assert.eql(creqs, [ {
+    t.deepEqual(creqs, [ {
         method : 'methods',
         arguments : [ {} ],
         callbacks : {},
@@ -56,30 +50,25 @@ exports.protoHashes = function () {
     
     c.request('x', [
         function (x, y , z) {
-            clearTimeout(tf); 
-            assert.eql([ x, y, z ], [ 7, 8, 9 ]);
+            t.deepEqual([ x, y, z ], [ 7, 8, 9 ]);
         },
         function (qr) {
-            clearTimeout(tg);
-            assert.eql(qr, [ 'q', 'r' ]);
+            t.deepEqual(qr, [ 'q', 'r' ]);
         }
     ]);
     
-    assert.eql(creqs.slice(1), [ {
+    t.deepEqual(creqs.slice(1), [ {
         method : 'x',
         arguments : [ '[Function]', '[Function]' ],
         callbacks : { 0 : [ '0' ], 1 : [ '1' ] },
         links : [],
     } ]);
     
-    var tt = setTimeout(function () {
-        assert.fail('broken json never emitted an error');
-    }, 5000);
     c.on('error', function (err) {
-        clearTimeout(tt);
-        assert.ok(err.stack);
-        assert.ok(err.message.match(/^Error parsing JSON/));
-        assert.ok(err instanceof SyntaxError);
+        t.ok(err.stack);
+        t.ok(err.message.match(/^Error parsing JSON/));
+        t.ok(err instanceof SyntaxError);
+        t.end();
     });
     c.parse('{');
-};
+});

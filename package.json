@@ -13,8 +13,11 @@
         "traverse" : "0.5.x",
         "jsonify" : "0.0.x"
     },
+    "devDependencies" : {
+        "tap" : "0.1.x"
+    },
     "scripts": {
-        "test": "expresso"
+        "test": "tap test/*.js"
     },
     "engines": { "node" : ">=0.2.0" }
 }
