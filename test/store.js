@@ -41,5 +41,3 @@ test('store', function (t) {
     t.deepEqual(s.items.length, 3);
     t.end();
 });
-
-
