@@ -314,7 +314,10 @@ var parseArgs = exports.parseArgs = function (argv) {
             if (arg.__proto__ === Object.prototype) {
                 // merge vanilla objects into params
                 Object.keys(arg).forEach(function (key) {
-                    params[key] = arg[key];
+                    params[key] = key === 'port'
+                        ? parseInt(arg[key], 10)
+                        : arg[key]
+                    ;
                 });
             }
             else if (stream.Stream && arg instanceof stream.Stream) {
