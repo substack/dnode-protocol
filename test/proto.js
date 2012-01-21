@@ -7,8 +7,8 @@ test('proto hashes', function (t) {
     
     var server = proto({
         x : function (f, g) {
-            setTimeout(f.bind({}, 7, 8, 9), 50);
-            setTimeout(g.bind({}, [ 'q', 'r' ]), 100);
+            setTimeout(f.bind({}, 7, 8, 9), 25);
+            setTimeout(g.bind({}, [ 'q', 'r' ]), 50);
         },
         y : 555
     });
@@ -48,12 +48,15 @@ test('proto hashes', function (t) {
         links : [],
     } ]);
     
+    var pending = 2;
     c.request('x', [
         function (x, y , z) {
             t.deepEqual([ x, y, z ], [ 7, 8, 9 ]);
+            if (--pending === 0) t.end();
         },
         function (qr) {
             t.deepEqual(qr, [ 'q', 'r' ]);
+            if (--pending === 0) t.end();
         }
     ]);
     
@@ -68,7 +71,6 @@ test('proto hashes', function (t) {
         t.ok(err.stack);
         t.ok(err.message.match(/^Error parsing JSON/));
         t.ok(err instanceof SyntaxError);
-        t.end();
     });
     c.parse('{');
 });
