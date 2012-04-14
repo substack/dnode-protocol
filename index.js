@@ -78,8 +78,7 @@ var Session = exports.Session = function (id, wrapper) {
             return;
         }
         
-        try { self.handle(msg) }
-        catch (err) { self.emit('error', err) }
+        self.handle(msg);
     };
     
     self.handle = function (req) {
@@ -140,8 +139,7 @@ var Session = exports.Session = function (id, wrapper) {
     }
     
     function apply(f, obj, args) {
-        try { f.apply(obj, args) }
-        catch (err) { self.emit('error', err) }
+        f.apply(obj, args);
     }
     
     return self;
