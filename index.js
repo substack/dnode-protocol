@@ -141,7 +141,13 @@ var Session = exports.Session = function (id, wrapper) {
     
     function apply(f, obj, args) {
         try { f.apply(obj, args) }
-        catch (err) { self.emit('error', err) }
+        catch (err) {
+            // Work around a Chrome bug where re-throwing an error destroys
+            // the stack trace:
+            //   http://code.google.com/p/chromium/issues/detail?id=60240
+            console.error('dnode callback threw error: ' + err.stack);
+            self.emit('error', err);
+        }
     }
     
     return self;
