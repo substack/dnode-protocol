@@ -1,6 +1,11 @@
 var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
-var stream = require('stream');
+
+var stream = function () {};
+try {
+    stream = require('stream');
+} catch (e) {};
+
 var json = typeof JSON === 'object' ? JSON : require('jsonify');
 
 var exports = module.exports = function (wrapper) {

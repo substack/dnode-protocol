@@ -1,4 +1,7 @@
-var test = require('tap').test;
+var test;
+try { test = require('tap').test }
+catch (e) { test = require('testling') }
+
 var protocol = require('../');
 
 function argv () { return arguments }
