@@ -1,6 +1,6 @@
-var test;
-try { test = require('tap').test }
-catch (e) { test = require('testling') }
+var test = typeof window === 'undefined'
+    ? require('tap').test : require('testling')
+;
 
 var protocol = require('../');
 
@@ -26,7 +26,7 @@ test('args', function (t) {
     );
     
     t.deepEqual(
-        protocol.parseArgs(argv('meow.cats.com', { port : '1234', })),
+        protocol.parseArgs(argv('meow.cats.com', { port : '1234' })),
         { host : 'meow.cats.com', port : 1234 }
     );
     

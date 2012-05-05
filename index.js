@@ -1,12 +1,12 @@
 var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
 
-var stream = function () {};
-try {
-    stream = require('stream');
-} catch (e) {};
-
 var json = typeof JSON === 'object' ? JSON : require('jsonify');
+var Object_keys = Object.keys || function (obj) {
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    return keys;
+};
 
 var exports = module.exports = function (wrapper) {
     var self = {};
@@ -132,11 +132,11 @@ var Session = exports.Session = function (id, wrapper) {
         }
         
         // copy since assignment discards the previous refs
-        Object.keys(self.remote).forEach(function (key) {
+        Object_keys(self.remote).forEach(function (key) {
             delete self.remote[key];
         });
         
-        Object.keys(methods).forEach(function (key) {
+        Object_keys(methods).forEach(function (key) {
             self.remote[key] = methods[key];
         });
         
@@ -196,7 +196,7 @@ var Scrubber = exports.Scrubber = function (store) {
     // return a callback of its own.
     self.unscrub = function (msg, f) {
         var args = msg.arguments || [];
-        Object.keys(msg.callbacks || {}).forEach(function (strId) {
+        Object_keys(msg.callbacks || {}).forEach(function (strId) {
             var id = parseInt(strId,10);
             var path = msg.callbacks[id];
             args = setAt(args, path, f(id));
@@ -316,21 +316,22 @@ var parseArgs = exports.parseArgs = function (argv) {
             params.block = arg;
         }
         else if (typeof arg === 'object') {
-            if (arg.__proto__ === Object.prototype) {
+            if (arg && typeof arg.listen === 'function') {
+                // servers can .listen()
+                params.server = arg;
+            }
+            else if (arg && typeof arg.write === 'function') {
+                // streams can .write()
+                params.stream = arg;
+            }
+            else {
                 // merge vanilla objects into params
-                Object.keys(arg).forEach(function (key) {
+                Object_keys(arg).forEach(function (key) {
                     params[key] = key === 'port'
                         ? parseInt(arg[key], 10)
                         : arg[key]
                     ;
                 });
-            }
-            else if (stream.Stream && arg instanceof stream.Stream) {
-                params.stream = arg;
-            }
-            else {
-                // and non-Stream, non-vanilla objects are probably servers
-                params.server = arg;
             }
         }
         else if (typeof arg === 'undefined') {
