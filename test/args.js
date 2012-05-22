@@ -20,7 +20,7 @@ test('args', function (t) {
     t.deepEqual(
         protocol.parseArgs(argv({
             host : 'moosy.moo.com',
-            port : 5050,
+            port : 5050
         })),
         { host : 'moosy.moo.com', port : 5050 }
     );
