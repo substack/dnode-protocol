@@ -7,7 +7,7 @@ var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
 
 test('protoFn', function (t) {
-    t.plan(11);
+    t.plan(10);
     
     var server = proto(function (remote, conn) {
         t.ok(conn);
@@ -79,8 +79,7 @@ test('protoFn', function (t) {
     } ]);
     
     c.on('error', function (err) {
-        t.ok(err.stack);
-        t.ok(err.message.match(/^Error parsing JSON/));
+        t.ok(/JSON/.test(String(err)));
         t.ok(err instanceof SyntaxError);
     });
     c.parse('{');
