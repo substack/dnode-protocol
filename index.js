@@ -271,7 +271,11 @@ var Store = exports.Store = function() {
     };
     
     self.indexOf = function (fn) {
-        return items.indexOf(fn);
+        if (items.indexOf) return items.indexOf(fn);
+        for (var i = 0; i < items.length; i++) {
+            if (items[i] === fn) return i;
+        }
+        return -1;
     };
     
     function wrap (fn) {
