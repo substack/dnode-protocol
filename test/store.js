@@ -1,5 +1,7 @@
-var test = require('tap').test;
-var Store = require('dnode-protocol').Store;
+var test;
+try { test = require('tap').test; }
+catch (e) { test = require('testling') }
+var Store = require('../').Store;
 
 test('store', function (t) {
     var s = new Store;

@@ -1,4 +1,6 @@
-var test = require('tap').test;
+var test;
+try { test = require('tap').test; }
+catch (e) { test = require('testling') }
 var Scrubber = require('../').Scrubber;
 
 test('circular', function (t) {

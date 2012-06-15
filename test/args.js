@@ -1,6 +1,6 @@
-var test = typeof window === 'undefined'
-    ? require('tap').test : require('testling')
-;
+var test;
+try { test = require('tap').test; }
+catch (e) { test = require('testling') }
 
 var protocol = require('../');
 
