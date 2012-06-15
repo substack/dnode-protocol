@@ -8,6 +8,8 @@ If you care about how this particular module works and want to use it for
 whatever reason, check out
 [all the tests in test/](https://github.com/substack/dnode-protocol/tree/master/test).
 
+[![build status](https://secure.travis-ci.org/substack/dnode-protocol.png)](http://travis-ci.org/substack/dnode-protocol)
+
 the protocol
 ============
 
