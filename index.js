@@ -2,11 +2,18 @@ var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
 
 var json = typeof JSON === 'object' ? JSON : require('jsonify');
-var Object_keys = Object.keys || function (obj) {
+var objectKeys = Object.keys || function (obj) {
     var keys = [];
     for (var key in obj) keys.push(key);
     return keys;
 };
+
+function forEach (xs, f) {
+    if (xs.forEach) return xs.forEach(f)
+    for (var i = 0; i < xs.length; i++) {
+        f.call(xs, xs[i], i);
+    }
+}
 
 var exports = module.exports = function (wrapper) {
     var self = {};
@@ -107,7 +114,7 @@ var Session = exports.Session = function (id, wrapper) {
             self.emit('remoteError', methods);
         }
         else if (req.method === 'cull') {
-            args.forEach(function (id) {
+            forEach(args, function (id) {
                 self.remoteStore.cull(args);
             });
         }
@@ -132,11 +139,11 @@ var Session = exports.Session = function (id, wrapper) {
         }
         
         // copy since assignment discards the previous refs
-        Object_keys(self.remote).forEach(function (key) {
+        forEach(objectKeys(self.remote), function (key) {
             delete self.remote[key];
         });
         
-        Object_keys(methods).forEach(function (key) {
+        forEach(objectKeys(methods), function (key) {
             self.remote[key] = methods[key];
         });
         
@@ -196,13 +203,13 @@ var Scrubber = exports.Scrubber = function (store) {
     // return a callback of its own.
     self.unscrub = function (msg, f) {
         var args = msg.arguments || [];
-        Object_keys(msg.callbacks || {}).forEach(function (strId) {
+        forEach(objectKeys(msg.callbacks || {}), function (strId) {
             var id = parseInt(strId,10);
             var path = msg.callbacks[id];
             args = setAt(args, path, f(id));
         });
         
-        (msg.links || []).forEach(function (link) {
+        forEach(msg.links || [], function (link) {
             var value = getAt(args, link.from);
             args = setAt(args, link.to, value);
         });
@@ -301,7 +308,7 @@ var Store = exports.Store = function() {
 var parseArgs = exports.parseArgs = function (argv) {
     var params = {};
     
-    [].slice.call(argv).forEach(function (arg) {
+    forEach([].slice.call(argv), function (arg) {
         if (typeof arg === 'string') {
             if (arg.match(/^\d+$/)) {
                 params.port = parseInt(arg, 10);
@@ -330,7 +337,7 @@ var parseArgs = exports.parseArgs = function (argv) {
             }
             else {
                 // merge vanilla objects into params
-                Object_keys(arg).forEach(function (key) {
+                forEach(objectKeys(arg), function (key) {
                     params[key] = key === 'port'
                         ? parseInt(arg[key], 10)
                         : arg[key]
