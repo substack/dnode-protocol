@@ -47,7 +47,7 @@ test('protoFn', function (t) {
         method : 'methods',
         arguments : [ { x : '[Function]', y : 555 } ],
         callbacks : { 0 : [ '0', 'x' ] },
-        links : [],
+        links : []
     } ]);
     
     c.start();
@@ -56,7 +56,7 @@ test('protoFn', function (t) {
         method : 'methods',
         arguments : [ { a : 1, b : 2 } ],
         callbacks : {},
-        links : [],
+        links : []
     } ]);
     
     var pending = 2;
@@ -75,7 +75,7 @@ test('protoFn', function (t) {
         method : 'x',
         arguments : [ '[Function]', '[Function]' ],
         callbacks : { 0 : [ '0' ], 1 : [ '1' ] },
-        links : [],
+        links : []
     } ]);
     
     c.on('error', function (err) {
