@@ -1,7 +1,6 @@
 var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
 
-var json = typeof JSON === 'object' ? JSON : require('jsonify');
 var objectKeys = Object.keys || function (obj) {
     var keys = [];
     for (var key in obj) keys.push(key);
@@ -80,20 +79,6 @@ var Session = exports.Session = function (id, wrapper) {
         });
     };
     
-    self.parse = function (line) {
-        var msg = null;
-        try { msg = json.parse(line) }
-        catch (err) {
-            self.emit('error', new SyntaxError(
-                'Error parsing JSON message: ' + json.stringify(line))
-            );
-            return;
-        }
-        
-        try { self.handle(msg) }
-        catch (err) { self.emit('error', err) }
-    };
-    
     self.handle = function (req) {
         var args = scrubber.unscrub(req, function (id) {
             if (!self.remoteStore.has(id)) {
@@ -109,10 +94,6 @@ var Session = exports.Session = function (id, wrapper) {
         if (req.method === 'methods') {
             handleMethods(args[0]);
         }
-        else if (req.method === 'error') {
-            var methods = args[0];
-            self.emit('remoteError', methods);
-        }
         else if (req.method === 'cull') {
             forEach(args, function (id) {
                 self.remoteStore.cull(args);
@@ -123,13 +104,17 @@ var Session = exports.Session = function (id, wrapper) {
                 apply(self.instance[req.method], self.instance, args);
             }
             else {
-                self.emit('error', new Error(
+                self.emit('fail', new Error(
                     'Request for non-enumerable method: ' + req.method
                 ));
             }
         }
         else if (typeof req.method == 'number') {
-            apply(self.localStore.get(req.method), self.instance, args);
+            var fn = self.locatlStore.get(req.method);
+            if (!fn) {
+                self.emit('fail', new Error('no such method'));
+            }
+            else apply(fn, self.instance, args);
         }
     }
     
