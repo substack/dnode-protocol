@@ -1,7 +1,7 @@
 var test;
 try { test = require('tap').test; }
 catch (e) { test = require('testling') }
-var Store = require('../').Store;
+var Store = require('../lib/store');
 
 test('store', function (t) {
     var s = new Store;

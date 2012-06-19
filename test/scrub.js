@@ -1,7 +1,7 @@
 var test;
 try { test = require('tap').test; }
 catch (e) { test = require('testling') }
-var Scrubber = require('../').Scrubber;
+var Scrubber = require('../lib/scrub');
 
 test('no functions', function (t) {
     var s = new Scrubber;

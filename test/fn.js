@@ -9,7 +9,7 @@ var EventEmitter = require('events').EventEmitter;
 test('protoFn', function (t) {
     t.plan(8);
     
-    var server = proto(function (remote, conn) {
+    var s = proto(function (remote, conn) {
         t.ok(conn);
         t.ok(conn instanceof EventEmitter);
         
@@ -24,10 +24,7 @@ test('protoFn', function (t) {
         this.y = 555;
     });
     
-    var client = proto({ a : 1, b : 2 });
-    
-    var s = server.create();
-    var c = client.create();
+    var c = proto({ a : 1, b : 2 });
     
     var sreqs = [];
     s.on('request', function (req) {

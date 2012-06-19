@@ -5,7 +5,7 @@ var traverse = require('traverse');
 test('proto hashes', function (t) {
     t.plan(4);
     
-    var server = proto({
+    var s = proto({
         x : function (f, g) {
             setTimeout(f.bind({}, 7, 8, 9), 25);
             setTimeout(g.bind({}, [ 'q', 'r' ]), 50);
@@ -13,10 +13,7 @@ test('proto hashes', function (t) {
         y : 555
     });
     
-    var client = proto({});
-    
-    var s = server.create();
-    var c = client.create();
+    var c = proto({});
     
     var sreqs = [];
     s.on('request', function (req) {
