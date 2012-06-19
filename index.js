@@ -110,7 +110,7 @@ var Session = exports.Session = function (id, wrapper) {
             }
         }
         else if (typeof req.method == 'number') {
-            var fn = self.locatlStore.get(req.method);
+            var fn = self.localStore.get(req.method);
             if (!fn) {
                 self.emit('fail', new Error('no such method'));
             }

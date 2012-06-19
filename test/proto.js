@@ -3,7 +3,7 @@ var proto = require('../');
 var traverse = require('traverse');
 
 test('proto hashes', function (t) {
-    t.plan(7);
+    t.plan(4);
     
     var server = proto({
         x : function (f, g) {
@@ -66,11 +66,4 @@ test('proto hashes', function (t) {
         callbacks : { 0 : [ '0' ], 1 : [ '1' ] },
         links : [],
     } ]);
-    
-    c.on('error', function (err) {
-        t.ok(err.stack);
-        t.ok(err.message.match(/^Error parsing JSON/));
-        t.ok(err instanceof SyntaxError);
-    });
-    c.parse('{');
 });
