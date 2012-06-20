@@ -7,11 +7,10 @@ var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
 
 test('protoFn', function (t) {
-    t.plan(8);
+    t.plan(7);
     
     var s = proto(function (remote, conn) {
         t.ok(conn);
-        t.ok(conn instanceof EventEmitter);
         
         conn.on('ready', function () {
             t.deepEqual(remote, { a : 1, b : 2 });

@@ -3,20 +3,17 @@ var Scrubber = require('./lib/scrub');
 var Store = require('./lib/store');
 var objectKeys = require('./lib/keys');
 var forEach = require('./lib/foreach');
+var isEnumerable = require('./lib/is_enum');
 
 module.exports = function (cons) {
     return new Proto(cons);
 };
 
-/*
 (function () { // browsers bleh
     for (var key in EventEmitter.prototype) {
         Proto.prototype[key] = EventEmitter.prototype[key];
     }
 })();
-*/
-
-Proto.prototype = new EventEmitter;
 
 function Proto (cons) {
     var self = this;
@@ -79,7 +76,7 @@ Proto.prototype.handle = function (req) {
         });
     }
     else if (typeof req.method === 'string') {
-        if (self.instance.propertyIsEnumerable(req.method)) {
+        if (isEnumerable(self.instance, req.method)) {
             self.apply(self.instance[req.method], self.instance, args);
         }
         else {
