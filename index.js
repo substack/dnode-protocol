@@ -37,7 +37,7 @@ Proto.prototype.start = function () {
 };
 
 Proto.prototype.cull = function (id) {
-    delete this.callbacks.local[id];
+    delete this.callbacks.remote[id];
     this.emit('request', {
         method : 'cull',
         arguments : [ id ]
@@ -78,7 +78,7 @@ Proto.prototype.handle = function (req) {
     }
     else if (req.method === 'cull') {
         forEach(args, function (id) {
-            delete self.callbacks.remote[id];
+            delete self.callbacks.local[id];
         });
     }
     else if (typeof req.method === 'string') {
