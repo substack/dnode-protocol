@@ -14,17 +14,14 @@ module.exports = function (cons) {
     }
 })();
 
-function Proto (cons, localRef) {
+function Proto (cons, opts) {
     var self = this;
     EventEmitter.call(self);
+    if (!opts) opts = {};
     self.remote = {};
     
-    self.callbacks = {
-        local : localRef || [],
-        remote : []
-    };
-    
-    self.scrubber = scrubber(self.callbacks.local);
+    self.callbacks = { local : [], remote : [] };
+    self.scrubber = scrubber(self.callbacks.local, opts.wrapper);
     
     if (typeof cons === 'function') {
         self.instance = new cons(self.remote, self);
@@ -37,6 +34,7 @@ Proto.prototype.start = function () {
 };
 
 Proto.prototype.cull = function (id) {
+    delete this.callbacks.local[id];
     this.emit('request', {
         method : 'cull',
         arguments : [ id ]
