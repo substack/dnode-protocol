@@ -4,8 +4,8 @@ var objectKeys = require('./lib/keys');
 var forEach = require('./lib/foreach');
 var isEnumerable = require('./lib/is_enum');
 
-module.exports = function (cons, wrap) {
-    return new Proto(cons, wrap);
+module.exports = function (cons, opts) {
+    return new Proto(cons, opts);
 };
 
 (function () { // browsers bleh
@@ -14,13 +14,15 @@ module.exports = function (cons, wrap) {
     }
 })();
 
-function Proto (cons, wrap) {
+function Proto (cons, opts) {
     var self = this;
     EventEmitter.call(self);
+    if (!opts) opts = {};
     
     self.remote = {};
     self.callbacks = { local : [], remote : [] };
-    self.wrap = wrap;
+    self.wrap = opts.wrap;
+    self.unwrap = opts.unwrap;
     
     self.scrubber = scrubber(self.callbacks.local);
     
@@ -62,14 +64,13 @@ Proto.prototype.handle = function (req) {
             var cb = function () {
                 self.request(id, [].slice.apply(arguments));
             };
-            if (self.wrap) {
-                var ref = self.wrap(cb, id);
-                self.callbacks.remote[id] = ref;
-                return cb;
-            }
-            else self.callbacks.remote[id] = cb;
+            self.callbacks.remote[id] = self.wrap ? self.wrap(cb, id) : cb;
+            return cb;
         }
-        return self.callbacks.remote[id];
+        return self.unwrap
+            ? self.unwrap(self.callbacks.remote[id])
+            : self.callbacks.remote[id]
+        ;
     });
     
     if (req.method === 'methods') {

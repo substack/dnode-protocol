@@ -35,9 +35,9 @@ test('proto hashes', function (t) {
             setTimeout(g.bind({}, [ 'q', 'r' ]), 50);
         },
         y : 555
-    }, swrapper);
+    }, { wrap : swrapper });
     
-    var c = proto({}, cwrapper);
+    var c = proto({}, { wrap : cwrapper });
     
     var sreqs = [];
     s.on('request', function (req) {
