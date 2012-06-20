@@ -1,10 +1,10 @@
 var test;
 try { test = require('tap').test; }
 catch (e) { test = require('testling') }
-var Scrubber = require('../lib/scrub');
+var scrubber = require('../lib/scrub');
 
 test('no functions', function (t) {
-    var s = new Scrubber;
+    var s = scrubber([]);
     t.deepEqual(
         s.scrub([ 1, 2, 3 ]),
         {
@@ -26,7 +26,7 @@ test('no functions', function (t) {
 });
 
 test('functions', function (t) {
-    var s = new Scrubber;
+    var s = scrubber([]);
     
     var calls = { f : 0, g : 0 };
     var f = function () { calls.f ++ };
@@ -49,7 +49,7 @@ test('functions', function (t) {
 });
 
 test('link', function (t) {
-    var s = new Scrubber;
+    var s = scrubber([]);
     var x = [ [ 0, { a : 1, b : 2, c : 3 }, 4 ], 5, 6 ];
     x[0][1].d = x[0][1];
     var sc = s.scrub(x);
@@ -65,7 +65,7 @@ test('link', function (t) {
 });
 
 test('multilink', function (t) {
-    var s = new Scrubber;
+    var s = scrubber([]);
     var x = [ [ 0, { a : 1, b : 2, c : 3 }, 4 ], 5, 6 ];
     x[0][1].d = x[0][1];
     x.push(x);
@@ -86,7 +86,7 @@ test('multilink', function (t) {
 });
 
 test('enum set link', function (t) {
-    var s = new Scrubber;
+    var s = scrubber([]);
     var req = {
         method : 0,
         arguments : [ 33, '[Function]' ],
@@ -105,7 +105,7 @@ test('enum set link', function (t) {
 });
 
 test('enum get link', function (t) {
-    var s = new Scrubber;
+    var s = scrubber([]);
     var req = {
         method : 0,
         arguments : [ 'doom', '[Function]' ],
@@ -125,7 +125,7 @@ test('enum get link', function (t) {
 });
 
 test('skip set', function (t) {
-    var s = new Scrubber;
+    var s = scrubber([]);
     var req = {
         method : 0,
         arguments : [ { x : 33 }, '[Function]' ],
