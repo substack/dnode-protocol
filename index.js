@@ -17,10 +17,12 @@ module.exports = function (cons, wrap) {
 function Proto (cons, wrap) {
     var self = this;
     EventEmitter.call(self);
-    self.remote = {};
     
+    self.remote = {};
     self.callbacks = { local : [], remote : [] };
-    self.scrubber = scrubber(self.callbacks.local, wrap);
+    self.wrap = wrap;
+    
+    self.scrubber = scrubber(self.callbacks.local);
     
     if (typeof cons === 'function') {
         self.instance = new cons(self.remote, self);
@@ -57,9 +59,10 @@ Proto.prototype.handle = function (req) {
         if (self.callbacks.remote[id] === undefined) {
             // create a new function only if one hasn't already been created
             // for a particular id
-            self.callbacks.remote[id] = function () {
+            var cb = function () {
                 self.request(id, [].slice.apply(arguments));
             };
+            self.callbacks.remote[id] = self.wrap ? self.wrap(cb, id) : cb;
         }
         return self.callbacks.remote[id];
     });

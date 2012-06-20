@@ -8,8 +8,8 @@ test('proto hashes', function (t) {
     
     var times = { s : 0, c : 0 };
     function done () {
-        t.same(times.s, 1); // x(f,g)
-        t.same(times.c, 2); // f, g
+        t.same(times.s, 2); // f, g
+        t.same(times.c, 1); // x(f,g)
         t.end();
     }
     

@@ -12,7 +12,7 @@ var s = (function () {
     return proto(cons, function (cb, id) {
         var ref = weak(cb, function () {
             console.log('s.cull(' + id + ')')
-            s.cull(id);
+            //s.cull(id);
         });
         return function () {
             var f = weak.get(ref);
@@ -24,7 +24,7 @@ var s = (function () {
 var c = proto({}, function (cb, id) {
     var ref = weak(cb, function () {
         console.log('c.cull(' + id + ')')
-        c.cull(id);
+        //c.cull(id);
     });
     return function () {
         var f = weak.get(ref);
