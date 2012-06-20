@@ -14,8 +14,7 @@
         "jsonify" : "~0.0.0"
     },
     "devDependencies" : {
-        "tap" : "~0.2.5",
-        "weak" : "~0.2.1"
+        "tap" : "~0.2.5"
     },
     "scripts": {
         "test": "tap test/*.js"
