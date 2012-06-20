@@ -12,6 +12,35 @@ example
 =======
 
 ``` js
+var proto = require('dnode-protocol');
+
+var s = proto({
+    x : function (f, g) {
+        setTimeout(function () { f(5) }, 200);
+        setTimeout(function () { g(6) }, 400);
+    },
+    y : 555
+});
+var c = proto();
+
+s.on('request', c.handle.bind(c));
+c.on('request', s.handle.bind(s));
+
+c.on('remote', function (remote) {
+    function f (x) { console.log('f(' + x + ')') }
+    function g (x) { console.log('g(' + x + ')') }
+    remote.x(f, g);
+});
+
+s.start();
+c.start();
+```
+
+***
+
+```
+f(5)
+g(6)
 ```
 
 methods
@@ -21,22 +50,90 @@ methods
 var protocol = require('dnode-protocol')
 ```
 
-var proto = protocol(cons, localRef=[])
----------------------------------------
+var proto = protocol(cons={}, wrap)
+-----------------------------------
 
-Create a new protocol object with a constructor `cons`.
+Create a new protocol object with a constructor `cons` and an optional callback
+wrapper `wrap`.
 
+`cons` should be a function, in which case it will be used to create an instance
+by `new cons(remote, proto)` where `remote` is an empty reference to the remote
+object before being populated and `proto` is the protocol instance.
 
+If you return an object in `cons` the return value will be used
+(`new` does that part).
 
-other languages
-===============
+If you pass in a non-function as `cons`, its value will be used as the instance
+directly.
 
-These libraries implement the dnode protocol too so you can make RPC calls
-between scripts written in different languages.
+If specified, `wrap` gets called with `wrap(fn, id)` and should return the new
+`fn` callback to use (it can be the same one).
 
-* [dnode-perl](http://github.com/substack/dnode-perl)
-* [dnode-ruby](http://github.com/substack/dnode-ruby)
+`wrap` can be used to transform or mark callbacks before they are
+inserted into the internal callacks.local hash. This is useful if you want to
+implement weakrefs on top of dnode-protocol.
 
-There's a python one in the works too at
-* [dnode-python](https://github.com/jesusabdullah/dnode-python)
-but it's not finished yet.
+proto.handle(req)
+-----------------
+
+Handle a request object emitted by the request event, calling the method the
+request mentions with the provided arguments.
+
+proto.request(method, args)
+---------------------------
+
+Emit a request event for the method id `method` and the raw arguments `args`.
+The args will be scrubbed for callbacks and emitted in normal form suitable for
+passing to `JSON.stringify()`.
+
+proto.start()
+-------------
+
+Begin the methods exchange. All listeners should be bound before this function
+is called.
+
+proto.cull(id)
+--------------
+
+Instruct the opposing connection to drop all references to the callback
+specified by `id`.
+
+events
+======
+
+proto.on('request', function (req) { ... })
+-------------------------------------------
+
+Emitted when a request is ready to be sent.
+
+The request should be serialized and passed to the opposing connection's
+`.handle()`.
+
+proto.on('remote', function (remote) { ... })
+---------------------------------------------
+
+Emitted when the remote reference has been populated.
+
+proto.on('fail', function (err) { ... })
+----------------------------------------
+
+Emitted when there is a non-fatal failed request.
+
+proto.on('error', function (err) { ... })
+-----------------------------------------
+
+Emitted when there is a fatal exception one of the local callbacks.
+
+install
+=======
+
+With [npm](http://npmjs.org) do:
+
+```
+npm install dnode-protocol
+```
+
+license
+=======
+
+MIT
