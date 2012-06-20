@@ -4,8 +4,8 @@ var objectKeys = require('./lib/keys');
 var forEach = require('./lib/foreach');
 var isEnumerable = require('./lib/is_enum');
 
-module.exports = function (cons) {
-    return new Proto(cons);
+module.exports = function (cons, opts) {
+    return new Proto(cons, opts);
 };
 
 (function () { // browsers bleh

@@ -3,13 +3,13 @@ var proto = require('../');
 var traverse = require('traverse');
 
 test('proto hashes', function (t) {
-    t.plan(8);
+    t.plan(10);
     var pending = 5;
     
     var times = { s : 0, c : 0 };
     function done () {
         t.same(times.s, 1); // x(f,g)
-:       t.same(times.c, 2); // f, g
+        t.same(times.c, 2); // f, g
         t.end();
     }
     
@@ -18,6 +18,7 @@ test('proto hashes', function (t) {
         t.equal(typeof fn, 'function');
         times.s ++;
         if (--pending === 0) done();
+        return fn;
     }
     
     function cwrapper (fn) {
@@ -25,6 +26,7 @@ test('proto hashes', function (t) {
         t.equal(typeof fn, 'function');
         times.c ++;
         if (--pending === 0) done();
+        return fn;
     }
     
     var s = proto({
