@@ -4,8 +4,8 @@ var objectKeys = require('./lib/keys');
 var forEach = require('./lib/foreach');
 var isEnumerable = require('./lib/is_enum');
 
-module.exports = function (cons, opts) {
-    return new Proto(cons, opts);
+module.exports = function (cons, wrap) {
+    return new Proto(cons, wrap);
 };
 
 (function () { // browsers bleh
@@ -14,14 +14,13 @@ module.exports = function (cons, opts) {
     }
 })();
 
-function Proto (cons, opts) {
+function Proto (cons, wrap) {
     var self = this;
     EventEmitter.call(self);
-    if (!opts) opts = {};
     self.remote = {};
     
     self.callbacks = { local : [], remote : [] };
-    self.scrubber = scrubber(self.callbacks.local, opts.wrapper);
+    self.scrubber = scrubber(self.callbacks.local, wrap);
     
     if (typeof cons === 'function') {
         self.instance = new cons(self.remote, self);
@@ -79,13 +78,13 @@ Proto.prototype.handle = function (req) {
         }
         else {
             self.emit('fail', new Error(
-                'Request for non-enumerable method: ' + req.method
+                'request for non-enumerable method: ' + req.method
             ));
         }
     }
     else if (typeof req.method == 'number') {
         var fn = self.callbacks.local[req.method];
-        if (typeof fn !== 'function') {
+        if (!fn) {
             self.emit('fail', new Error('no such method'));
         }
         else self.apply(fn, args);
