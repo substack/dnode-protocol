@@ -50,7 +50,7 @@ methods
 var protocol = require('dnode-protocol')
 ```
 
-var proto = protocol(cons={}, wrap)
+var proto = protocol(cons, opts={})
 -----------------------------------
 
 Create a new protocol object with a constructor `cons` and an optional callback
@@ -66,12 +66,12 @@ If you return an object in `cons` the return value will be used
 If you pass in a non-function as `cons`, its value will be used as the instance
 directly.
 
-If specified, `wrap` gets called with `wrap(fn, id)` and should return the new
-`fn` callback to use (it can be the same one).
+You can optionally specify `opts.wrap` and `opts.unwrap` to wrap and unwrap
+remote values for implementing weakmaps or marking callbacks.
 
-`wrap` can be used to transform or mark callbacks before they are
-inserted into the internal callacks.local hash. This is useful if you want to
-implement weakrefs on top of dnode-protocol.
+The return value of `opts.wrap(cb, id)` will be stored in `proto.callbacks.remote[id]`
+and `opts.unwrap(ref, id)` will be called with the `ref` obtained from `wrap()`
+previously to turn `ref` back into a `cb`.
 
 proto.handle(req)
 -----------------
