@@ -1,5 +1,5 @@
 var EventEmitter = require('events').EventEmitter;
-var Scrubber = require('./lib/scrub');
+var scrubber = require('./lib/scrub');
 var objectKeys = require('./lib/keys');
 var forEach = require('./lib/foreach');
 var isEnumerable = require('./lib/is_enum');
@@ -24,7 +24,7 @@ function Proto (cons, localRef) {
         remote : []
     };
     
-    self.scrubber = new Scrubber(self.callbacks.local);
+    self.scrubber = scrubber(self.callbacks.local);
     
     if (typeof cons === 'function') {
         self.instance = new cons(self.remote, self);
