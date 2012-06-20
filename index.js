@@ -62,7 +62,12 @@ Proto.prototype.handle = function (req) {
             var cb = function () {
                 self.request(id, [].slice.apply(arguments));
             };
-            self.callbacks.remote[id] = self.wrap ? self.wrap(cb, id) : cb;
+            if (self.wrap) {
+                var ref = self.wrap(cb, id);
+                self.callbacks.remote[id] = ref;
+                return cb;
+            }
+            else self.callbacks.remote[id] = cb;
         }
         return self.callbacks.remote[id];
     });
