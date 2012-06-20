@@ -9,15 +9,17 @@ var s = (function () {
         },
         y : 555
     };
-    return proto(cons, function (cb, id) {
-        var ref = weak(cb, function () {
-            console.log('s.cull(' + id + ')')
-            s.cull(id);
-        });
-        return function () {
-            var f = weak.get(ref);
-            if (f) f.apply(this, arguments);
-        };
+    return proto(cons, {
+        wrap : function (cb, id) {
+            return weak(cb, function () {
+                console.log('s.cull(' + id + ')')
+                s.cull(id);
+            });
+        },
+        unwrap : function (ref, id) {
+            var cb = weak.get(ref);
+            return cb || function () {};
+        }
     });
 })();
 

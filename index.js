@@ -68,7 +68,7 @@ Proto.prototype.handle = function (req) {
             return cb;
         }
         return self.unwrap
-            ? self.unwrap(self.callbacks.remote[id])
+            ? self.unwrap(self.callbacks.remote[id], id)
             : self.callbacks.remote[id]
         ;
     });
