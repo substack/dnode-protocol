@@ -1,6 +1,5 @@
 var EventEmitter = require('events').EventEmitter;
 var Scrubber = require('./lib/scrub');
-var Store = require('./lib/store');
 var objectKeys = require('./lib/keys');
 var forEach = require('./lib/foreach');
 var isEnumerable = require('./lib/is_enum');
@@ -15,23 +14,17 @@ module.exports = function (cons) {
     }
 })();
 
-function Proto (cons) {
+function Proto (cons, localRef) {
     var self = this;
     EventEmitter.call(self);
     self.remote = {};
     
-    self.localStore = new Store;
-    self.remoteStore = new Store;
+    self.callbacks = {
+        local : localRef || [],
+        remote : []
+    };
     
-    self.scrubber = new Scrubber(self.localStore);
-    
-    self.localStore.on('cull', function (id) {
-        self.emit('request', {
-            method : 'cull',
-            arguments : [id],
-            callbacks : {}
-        });
-    });
+    self.scrubber = new Scrubber(self.callbacks.local);
     
     if (typeof cons === 'function') {
         self.instance = new cons(self.remote, self);
@@ -41,6 +34,13 @@ function Proto (cons) {
 
 Proto.prototype.start = function () {
     this.request('methods', [ this.instance ]);
+};
+
+Proto.prototype.cull = function (id) {
+    this.emit('request', {
+        method : 'cull',
+        arguments : [ id ]
+    });
 };
 
 Proto.prototype.request = function (method, args) {
@@ -57,14 +57,14 @@ Proto.prototype.request = function (method, args) {
 Proto.prototype.handle = function (req) {
     var self = this;
     var args = self.scrubber.unscrub(req, function (id) {
-        if (!self.remoteStore.has(id)) {
+        if (self.callbacks.remote[id] === undefined) {
             // create a new function only if one hasn't already been created
             // for a particular id
-            self.remoteStore.add(function () {
+            self.callbacks.remote[id] = function () {
                 self.request(id, [].slice.apply(arguments));
-            }, id);
+            };
         }
-        return self.remoteStore.get(id);
+        return self.callbacks.remote[id];
     });
     
     if (req.method === 'methods') {
@@ -72,12 +72,12 @@ Proto.prototype.handle = function (req) {
     }
     else if (req.method === 'cull') {
         forEach(args, function (id) {
-            self.remoteStore.cull(args);
+            delete self.callbacks.remote[id];
         });
     }
     else if (typeof req.method === 'string') {
         if (isEnumerable(self.instance, req.method)) {
-            self.apply(self.instance[req.method], self.instance, args);
+            self.apply(self.instance[req.method], args);
         }
         else {
             self.emit('fail', new Error(
@@ -86,11 +86,11 @@ Proto.prototype.handle = function (req) {
         }
     }
     else if (typeof req.method == 'number') {
-        var fn = self.localStore.get(req.method);
-        if (!fn) {
+        var fn = self.callbacks.local[req.method];
+        if (typeof fn !== 'function') {
             self.emit('fail', new Error('no such method'));
         }
-        else self.apply(fn, self.instance, args);
+        else self.apply(fn, args);
     }
 };
 
@@ -113,7 +113,7 @@ Proto.prototype.handleMethods = function (methods) {
     self.emit('ready');
 };
 
-Proto.prototype.apply = function (f, obj, args) {
-    try { f.apply(obj, args) }
+Proto.prototype.apply = function (f, args) {
+    try { f.apply(undefined, args) }
     catch (err) { this.emit('error', err) }
 };
