@@ -7,8 +7,8 @@ test('proto hashes', function (t) {
     
     var s = proto({
         x : function (f, g) {
-            setTimeout(f.bind({}, 7, 8, 9), 25);
-            setTimeout(g.bind({}, [ 'q', 'r' ]), 50);
+            setTimeout(function () { f(7, 8, 9) }, 25);
+            setTimeout(function () { g([ 'q', 'r' ]) }, 50);
         },
         y : 555
     });
