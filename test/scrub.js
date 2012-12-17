@@ -1,6 +1,4 @@
-var test;
-try { test = require('tap').test; }
-catch (e) { test = require('testling') }
+var test = require('tape');
 var scrubber = require('../lib/scrub');
 
 test('no functions', function (t) {

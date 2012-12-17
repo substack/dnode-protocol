@@ -1,9 +1,9 @@
-var test = require('tap').test;
+var test = require('tape');
 var proto = require('../');
 var traverse = require('traverse');
 
 test('proto hashes', function (t) {
-    t.plan(4);
+    t.plan(5);
     
     var s = proto({
         x : function (f, g) {
@@ -49,11 +49,9 @@ test('proto hashes', function (t) {
     c.request('x', [
         function (x, y , z) {
             t.deepEqual([ x, y, z ], [ 7, 8, 9 ]);
-            if (--pending === 0) t.end();
         },
         function (qr) {
             t.deepEqual(qr, [ 'q', 'r' ]);
-            if (--pending === 0) t.end();
         }
     ]);
     

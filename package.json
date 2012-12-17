@@ -1,6 +1,6 @@
 {
     "name": "dnode-protocol",
-    "description": "Implements the dnode protocol abstractly",
+    "description": "implements the dnode protocol abstractly",
     "version": "0.2.2",
     "repository": "https://github.com/substack/dnode-protocol.git",
     "author": {
@@ -14,11 +14,11 @@
         "jsonify" : "~0.0.0"
     },
     "devDependencies" : {
-        "tap" : "~0.2.5"
+        "tap" : "~0.3.3",
+        "tape" : "~0.1.1"
     },
     "scripts": {
         "test": "tap test/*.js"
     },
-    "engines": { "node" : ">=0.4.0" },
     "license" : "MIT"
 }

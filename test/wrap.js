@@ -1,4 +1,4 @@
-var test = require('tap').test;
+var test = require('tape');
 var proto = require('../');
 var traverse = require('traverse');
 
