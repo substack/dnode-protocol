@@ -1,15 +1,15 @@
-dnode-protocol
-==============
+# dnode-protocol
 
 This module implements the dnode protocol in a reusable form that is presently
 used for both the server-side and browser-side dnode code.
 
-[Read about the protocol itself here.](https://github.com/substack/dnode-protocol/blob/master/doc/protocol.markdown)
+[![browser support](http://ci.testling.com/substack/dnode-protocol.png)](http://ci.testling.com/substack/dnode-protocol)
 
 [![build status](https://secure.travis-ci.org/substack/dnode-protocol.png)](http://travis-ci.org/substack/dnode-protocol)
 
-example
-=======
+[Read about the protocol itself here.](https://github.com/substack/dnode-protocol/blob/master/doc/protocol.markdown)
+
+# example
 
 ``` js
 var proto = require('dnode-protocol');
@@ -43,15 +43,13 @@ f(5)
 g(6)
 ```
 
-methods
-=======
+# methods
 
 ``` js
 var protocol = require('dnode-protocol')
 ```
 
-var proto = protocol(cons, opts={})
------------------------------------
+## var proto = protocol(cons, opts={})
 
 Create a new protocol object with a constructor `cons` and an optional callback
 wrapper `wrap`.
@@ -73,59 +71,49 @@ The return value of `opts.wrap(cb, id)` will be stored in `proto.callbacks.remot
 and `opts.unwrap(ref, id)` will be called with the `ref` obtained from `wrap()`
 previously to turn `ref` back into a `cb`.
 
-proto.handle(req)
------------------
+## proto.handle(req)
 
 Handle a request object emitted by the request event, calling the method the
 request mentions with the provided arguments.
 
-proto.request(method, args)
----------------------------
+## proto.request(method, args)
 
 Emit a request event for the method id `method` and the raw arguments `args`.
 The args will be scrubbed for callbacks and emitted in normal form suitable for
 passing to `JSON.stringify()`.
 
-proto.start()
--------------
+## proto.start()
 
 Begin the methods exchange. All listeners should be bound before this function
 is called.
 
-proto.cull(id)
---------------
+## proto.cull(id)
 
 Instruct the opposing connection to drop all references to the callback
 specified by `id`.
 
-events
-======
+# events
 
-proto.on('request', function (req) { ... })
--------------------------------------------
+## proto.on('request', function (req) { ... })
 
 Emitted when a request is ready to be sent.
 
 The request should be serialized and passed to the opposing connection's
 `.handle()`.
 
-proto.on('remote', function (remote) { ... })
----------------------------------------------
+## proto.on('remote', function (remote) { ... })
 
 Emitted when the remote reference has been populated.
 
-proto.on('fail', function (err) { ... })
-----------------------------------------
+## proto.on('fail', function (err) { ... })
 
 Emitted when there is a non-fatal failed request.
 
-proto.on('error', function (err) { ... })
------------------------------------------
+## proto.on('error', function (err) { ... })
 
 Emitted when there is a fatal exception one of the local callbacks.
 
-install
-=======
+# install
 
 With [npm](http://npmjs.org) do:
 
@@ -133,7 +121,6 @@ With [npm](http://npmjs.org) do:
 npm install dnode-protocol
 ```
 
-license
-=======
+# license
 
 MIT
