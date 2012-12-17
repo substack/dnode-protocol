@@ -12,7 +12,7 @@ test('circular', function (t) {
         {
             arguments : [ { a : 1, b : 2, c : '[Circular]' } ],
             callbacks : {},
-            links : [ { 'from' : [ '0' ], 'to' : [ '0', 'c' ] } ],
+            links : [ { 'from' : [ '0' ], 'to' : [ '0', 'c' ] } ]
         }
     );
     

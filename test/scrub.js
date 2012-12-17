@@ -8,7 +8,7 @@ test('no functions', function (t) {
         {
             arguments : [ 1, 2, 3 ],
             callbacks : {},
-            links : [],
+            links : []
         }
     );
     
@@ -17,7 +17,7 @@ test('no functions', function (t) {
         {
             arguments : [ 4, { a : 5, b : 6 } ],
             callbacks : {},
-            links : [],
+            links : []
         }
     );
     t.end();
@@ -34,7 +34,7 @@ test('functions', function (t) {
     t.deepEqual(sc, {
         arguments : [ 1, 2, '[Function]', '[Function]' ],
         callbacks : { 0 : [ '2' ], 1 : [ '3' ] },
-        links : [],
+        links : []
     });
     
     s.callbacks[0]();
@@ -57,7 +57,7 @@ test('link', function (t) {
             [ 0, { a : 1, b : 2, c : 3, d : '[Circular]' }, 4 ], 5, 6
         ],
         callbacks : {},
-        links : [ { from : [ '0', '1'  ], to : [ '0', '1', 'd' ] } ],
+        links : [ { from : [ '0', '1'  ], to : [ '0', '1', 'd' ] } ]
     });
     t.end();
 });
@@ -77,8 +77,8 @@ test('multilink', function (t) {
         callbacks : {},
         links : [
             { from : [ '0', '1'  ], to : [ '0', '1', 'd' ] },
-            { from : [], to : [ '3' ] },
-        ],
+            { from : [], to : [ '3' ] }
+        ]
     });
     t.end();
 });

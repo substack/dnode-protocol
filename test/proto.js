@@ -33,7 +33,7 @@ test('proto hashes', function (t) {
         method : 'methods',
         arguments : [ { x : '[Function]', y : 555 } ],
         callbacks : { 0 : [ '0', 'x' ] },
-        links : [],
+        links : []
     } ]);
     
     c.start();
@@ -42,7 +42,7 @@ test('proto hashes', function (t) {
         method : 'methods',
         arguments : [ {} ],
         callbacks : {},
-        links : [],
+        links : []
     } ]);
     
     var pending = 2;
@@ -59,6 +59,6 @@ test('proto hashes', function (t) {
         method : 'x',
         arguments : [ '[Function]', '[Function]' ],
         callbacks : { 0 : [ '0' ], 1 : [ '1' ] },
-        links : [],
+        links : []
     } ]);
 });
