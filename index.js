@@ -23,6 +23,7 @@ function Proto (cons, opts) {
     self.callbacks = { local : [], remote : [] };
     self.wrap = opts.wrap;
     self.unwrap = opts.unwrap;
+    self.wrapCallback = opts.wrapCallback;
     
     self.scrubber = scrubber(self.callbacks.local);
     
@@ -65,7 +66,7 @@ Proto.prototype.handle = function (req) {
                 self.request(id, [].slice.apply(arguments));
             };
             self.callbacks.remote[id] = self.wrap ? self.wrap(cb, id) : cb;
-            return cb;
+            return self.wrapCallback ? self.wrapCallback(cb) : cb;
         }
         return self.unwrap
             ? self.unwrap(self.callbacks.remote[id], id)
