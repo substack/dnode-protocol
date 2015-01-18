@@ -20,11 +20,11 @@ function Proto (cons, opts) {
     if (!opts) opts = {};
     
     self.remote = {};
-    self.callbacks = { local : [], remote : [] };
+    self.callbacks = { remote : [] };
     self.wrap = opts.wrap;
     self.unwrap = opts.unwrap;
     
-    self.scrubber = scrubber(self.callbacks.local);
+    self.scrubber = scrubber();
     
     if (typeof cons === 'function') {
         self.instance = new cons(self.remote, self);
@@ -77,9 +77,7 @@ Proto.prototype.handle = function (req) {
         self.handleMethods(args[0]);
     }
     else if (req.method === 'cull') {
-        forEach(args, function (id) {
-            delete self.callbacks.local[id];
-        });
+        forEach(args, this.scrubber.cull.bind(this.scrubber));
     }
     else if (typeof req.method === 'string') {
         if (isEnumerable(self.instance, req.method)) {
@@ -92,7 +90,7 @@ Proto.prototype.handle = function (req) {
         }
     }
     else if (typeof req.method == 'number') {
-        var fn = self.callbacks.local[req.method];
+        var fn = self.scrubber.find(req.method);
         if (!fn) {
             self.emit('fail', new Error('no such method'));
         }
