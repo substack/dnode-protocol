@@ -20,7 +20,7 @@ function Proto (cons, opts) {
     if (!opts) opts = {};
     
     self.remote = {};
-    self.callbacks = { remote : [] };
+    self.callbacks = { remote : {} };
     self.wrap = opts.wrap;
     self.unwrap = opts.unwrap;
     
@@ -79,22 +79,17 @@ Proto.prototype.handle = function (req) {
     else if (req.method === 'cull') {
         forEach(args, this.scrubber.cull.bind(this.scrubber));
     }
-    else if (typeof req.method === 'string') {
-        if (isEnumerable(self.instance, req.method)) {
+    else {
+        var fn = self.scrubber.find(req.method);
+        if (fn) {
+            self.apply(fn, args);
+        }
+        else if (isEnumerable(self.instance, req.method)) {
             self.apply(self.instance[req.method], args);
         }
         else {
-            self.emit('fail', new Error(
-                'request for non-enumerable method: ' + req.method
-            ));
-        }
-    }
-    else if (typeof req.method == 'number') {
-        var fn = self.scrubber.find(req.method);
-        if (!fn) {
             self.emit('fail', new Error('no such method'));
         }
-        else self.apply(fn, args);
     }
 };
 

@@ -3,7 +3,7 @@ var proto = require('../');
 var traverse = require('traverse');
 
 test('proto hashes', function (t) {
-    t.plan(5);
+    t.plan(8);
     
     var s = proto({
         x : function (f, g) {
@@ -29,10 +29,11 @@ test('proto hashes', function (t) {
     
     s.start();
     
+    t.deepEqual(sreqs[0].callbacks[Object.keys(sreqs[0].callbacks)[0]], [ '0', 'x' ]);
     t.deepEqual(sreqs, [ {
         method : 'methods',
         arguments : [ { x : '[Function]', y : 555 } ],
-        callbacks : { 0 : [ '0', 'x' ] },
+        callbacks : sreqs[0].callbacks,
         links : []
     } ]);
     
@@ -55,10 +56,12 @@ test('proto hashes', function (t) {
         }
     ]);
     
+    t.deepEqual(creqs.slice(1)[0].callbacks[Object.keys(creqs.slice(1)[0].callbacks)[0]], [ '0' ]);
+    t.deepEqual(creqs.slice(1)[0].callbacks[Object.keys(creqs.slice(1)[0].callbacks)[1]], [ '1' ]);
     t.deepEqual(creqs.slice(1), [ {
         method : 'x',
         arguments : [ '[Function]', '[Function]' ],
-        callbacks : { 0 : [ '0' ], 1 : [ '1' ] },
+        callbacks : creqs.slice(1)[0].callbacks,
         links : []
     } ]);
 });
