@@ -5,7 +5,7 @@ var traverse = require('traverse');
 var EventEmitter = require('events').EventEmitter;
 
 test('protoFn', function (t) {
-    t.plan(7);
+    t.plan(10);
     
     var s = proto(function (remote, conn) {
         t.ok(conn);
@@ -37,10 +37,11 @@ test('protoFn', function (t) {
     
     s.start();
     
+    t.deepEqual(sreqs[0].callbacks[Object.keys(sreqs[0].callbacks)[0]], [ '0', 'x' ]);
     t.deepEqual(sreqs, [ {
         method : 'methods',
         arguments : [ { x : '[Function]', y : 555 } ],
-        callbacks : { 0 : [ '0', 'x' ] },
+        callbacks : sreqs[0].callbacks,
         links : []
     } ]);
     
@@ -65,10 +66,12 @@ test('protoFn', function (t) {
         }
     ]);
     
+    t.deepEqual(creqs.slice(1)[0].callbacks[Object.keys(creqs.slice(1)[0].callbacks)[0]], [ '0' ]);
+    t.deepEqual(creqs.slice(1)[0].callbacks[Object.keys(creqs.slice(1)[0].callbacks)[1]], [ '1' ]);
     t.deepEqual(creqs.slice(1), [ {
         method : 'x',
         arguments : [ '[Function]', '[Function]' ],
-        callbacks : { 0 : [ '0' ], 1 : [ '1' ] },
+        callbacks : creqs.slice(1)[0].callbacks,
         links : []
     } ]);
 });

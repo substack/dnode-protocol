@@ -31,16 +31,20 @@ test('functions', function (t) {
     var g = function () { calls.g ++ };
     
     var sc = s.scrub([ 1, 2, f, g ]);
+    var ids = Object.keys(sc.callbacks)
+    
+    t.deepEqual(sc.callbacks[ids[0]], [ '2' ]);
+    t.deepEqual(sc.callbacks[ids[1]], [ '3' ]);
     t.deepEqual(sc, {
         arguments : [ 1, 2, '[Function]', '[Function]' ],
-        callbacks : { 0 : [ '2' ], 1 : [ '3' ] },
+        callbacks : sc.callbacks,
         links : []
     });
     
-    s.callbacks[0]();
+    s.callbacks[ids[0]]();
     t.deepEqual(calls, { f : 1, g : 0 });
     
-    s.callbacks[1]();
+    s.callbacks[ids[1]]();
     t.deepEqual(calls, { f : 1, g : 1 });
     
     t.end();
